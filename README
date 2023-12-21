@@ -1,0 +1,7 @@
+(WIP)
+
+	main.go  => main stuff
+	gen.go   => template + markdown conversion
+	index.go => index generation
+	posts.go => post stuff
+
