@@ -104,7 +104,7 @@ func (p *Post) ConvPost() {
 }
 
 // parse a .meta file into a new post
-func parseMeta(fpath string) *Post {
+func newPostFromMeta(fpath string) *Post {
 	parseKV := func(pair string) (k, v string) {
 		k, v, _ = strings.Cut(pair, ":")
 		return strings.Trim(k, " "), strings.Trim(v, " ")
@@ -178,7 +178,7 @@ func getAllPosts(basedir string) []*Post {
 			}
 
 			// parse meta file into new post
-			p := parseMeta(fullpath)
+			p := newPostFromMeta(fullpath)
 
 			p.MarkdownFile = mdPath
 			p.HtmlFile = htmlPath
