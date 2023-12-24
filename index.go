@@ -3,18 +3,34 @@ package main
 import (
 	"html/template"
 	"log"
+	"os"
 	"sort"
 	"time"
 )
 
-func inArchive(p *Post) bool {
-	archive := false
-	for _, link := range archivePerma {
-		if p.Permalink == link {
-			archive = true
-		}
+type Index struct {
+	List   []*Post
+	After  template.HTML
+	Before template.HTML
+	Footer template.HTML
+}
+
+func (data *Index) GenIndex(indexFile string) {
+	outputFile, err := os.Create(indexFile)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return archive
+	defer outputFile.Close()
+
+	t, err := template.ParseFiles("html/base.html", "html/posts.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = t.Execute(outputFile, data)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func genIndexSorted(indexPath string) {
@@ -33,7 +49,7 @@ func genIndexSorted(indexPath string) {
 
 	psa := make([]*Post, 0)
 	for _, p := range ps {
-		if !inArchive(p) {
+		if !p.Archived {
 			psa = append(psa, p)
 		}
 	}
@@ -45,7 +61,7 @@ func genIndexSorted(indexPath string) {
 		Footer: template.HTML(`<p><a href="https://creativecommons.org/licenses/by-sa/4.0/">&copy; CC BY-SA 4.0</a></p>`),
 	}
 
-	genIndex(data, indexPath)
+	data.GenIndex(indexPath)
 }
 
 func genArchiveSorted(archivePath string) {
@@ -64,7 +80,7 @@ func genArchiveSorted(archivePath string) {
 
 	psa := make([]*Post, 0)
 	for _, p := range ps {
-		if inArchive(p) {
+		if p.Archived {
 			psa = append(psa, p)
 		}
 	}
@@ -76,5 +92,5 @@ func genArchiveSorted(archivePath string) {
 		Footer: template.HTML(`<p><a href="https://creativecommons.org/licenses/by-sa/4.0/">&copy; CC BY-SA 4.0</a></p>`),
 	}
 
-	genIndex(data, archivePath)
+	data.GenIndex(archivePath)
 }
