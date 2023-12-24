@@ -15,7 +15,7 @@ type Index struct {
 	Footer template.HTML
 }
 
-func (data *Index) GenIndex(indexFile string) {
+func (data *Index) Execute(indexFile string) {
 	outputFile, err := os.Create(indexFile)
 	if err != nil {
 		log.Fatal(err)
@@ -61,7 +61,7 @@ func genIndexSorted(indexPath string) {
 		Footer: template.HTML(`<p><a href="https://creativecommons.org/licenses/by-sa/4.0/">&copy; CC BY-SA 4.0</a></p>`),
 	}
 
-	data.GenIndex(indexPath)
+	data.Execute(indexPath)
 }
 
 func genArchiveSorted(archivePath string) {
@@ -92,5 +92,5 @@ func genArchiveSorted(archivePath string) {
 		Footer: template.HTML(`<p><a href="https://creativecommons.org/licenses/by-sa/4.0/">&copy; CC BY-SA 4.0</a></p>`),
 	}
 
-	data.GenIndex(archivePath)
+	data.Execute(archivePath)
 }
