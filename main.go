@@ -28,8 +28,12 @@ func genAllPosts() {
 	ps := getAllPosts("./")
 	for _, p := range ps {
 		log.Printf("%s => %s", p.MarkdownFile, p.OutPath())
-		convPost(p)
-		genPost(p)
+
+		// prepare for template execution by conveting mardown => html
+		p.ConvPost()
+
+		// execute template to generate full .html
+		p.Execute()
 	}
 }
 
@@ -38,6 +42,7 @@ func main() {
 	//for _, post := range ps {
 	//	log.Printf("%s / %s / %s / %s ==> %s", post.MarkdownFile, post.Date, post.Title, post.Description, post.Permalink)
 	//}
+
 	log.Println("starting...")
 	genAllPosts()
 	log.Println("generating index...")
