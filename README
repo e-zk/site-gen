@@ -1,7 +1,9 @@
-(WIP)
+ssg for zakaria.org (WIP)
+=========================
 
 	main.go  => main clistuff
 	md.go    => markdown conversion
 	index.go => index generation
+	rss.go   => rss generation (TODO: could maybe just be part of index.go?)
 	posts.go => post model
 
