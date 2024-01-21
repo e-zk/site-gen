@@ -10,6 +10,7 @@ import (
 
 type Index struct {
 	List   []*Post
+	Title  string
 	After  template.HTML
 	Before template.HTML
 	Footer template.HTML
@@ -54,9 +55,11 @@ func genIndexSorted(indexPath string) {
 		}
 	}
 
+	// TODO: make this configurable somewhere / not hard-coded
 	data := Index{
 		List:   psa,
-		Before: template.HTML("<p>Writings...</p>"),
+		Title:  "Web log",
+		Before: template.HTML(`<p>Writings... Subscribe to the <a href="rss.xml">rss feed.</a></p>`),
 		After:  template.HTML(`<p><a href="./archive.html">&laquo; archive</a></p>`),
 		Footer: template.HTML(`<p><a href="https://creativecommons.org/licenses/by-sa/4.0/">&copy; CC BY-SA 4.0</a></p>`),
 	}
@@ -87,8 +90,9 @@ func genArchiveSorted(archivePath string) {
 
 	data := Index{
 		List:   psa,
-		Before: template.HTML("<p>Old/archived posts.</p>"),
-		After:  template.HTML(`<p><a href="/posts">&laquo; main posts</a></p>`),
+		Title:  "Archived posts",
+		Before: template.HTML(`<p>Archived posts.</p>`),
+		After:  template.HTML(`<p><a href="/posts">main posts &raquo;</a></p>`),
 		Footer: template.HTML(`<p><a href="https://creativecommons.org/licenses/by-sa/4.0/">&copy; CC BY-SA 4.0</a></p>`),
 	}
 
