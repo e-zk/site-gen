@@ -1,9 +1,15 @@
-ssg for zakaria.org (WIP)
-=========================
+WIP SSG FOR ZAKARIA.ORG
+=======================
 
 	main.go  => main clistuff
 	md.go    => markdown conversion
 	index.go => index generation
-	rss.go   => rss generation (TODO: could maybe just be part of index.go?)
 	posts.go => post model
+	rss.go   => rss generation (TODO: could maybe just be part of index.go?)
+
+TODO
+----
+
+	- rss/atom feed generation (should be easy to work out)
+	- auto-generate onion-location <meta> tag for onion address
 
