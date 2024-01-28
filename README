@@ -10,6 +10,20 @@ WIP SSG FOR ZAKARIA.ORG
 TODO
 ----
 
+	- open-graph tags
 	- rss/atom feed generation (should be easy to work out)
 	- auto-generate onion-location <meta> tag for onion address
+
+USAGE
+-----
+
+dir structure is:
+
+	page.md            # markdown content of standalone page
+	page.meta          # metadata for page.md
+	posts/
+		post1.md   # markdown content of post
+		post1.meta # metadata for post1.md
+
+everything in posts/ is indexed in posts/index.html
 
