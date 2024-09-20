@@ -28,7 +28,7 @@ func genRssFile(rssFile string) {
 	psa := make([]*Post, 0)
 	for _, p := range ps {
 		if !p.Archived {
-			p.ConvPost()
+			p.ConvPost(true)
 			d, _ := time.Parse("2006-01-02", p.Date)
 			p.Date = d.Format(time.RFC1123Z)
 			psa = append(psa, p)

@@ -15,6 +15,7 @@ const (
 )
 
 var (
+	// posts to archive
 	archivePerma = []string{
 		"https://zakaria.org/posts/2020-08-01-shblog.html",
 		"https://zakaria.org/posts/2020-08-03-m4.html",
@@ -30,7 +31,7 @@ func genAllPosts() {
 		log.Printf("%s => %s", p.MarkdownFile, p.OutPath())
 
 		// prepare for template execution by conveting mardown => html
-		p.ConvPost()
+		p.ConvPost(false)
 
 		// execute template to generate full .html
 		p.Execute()
@@ -49,4 +50,6 @@ func main() {
 	genIndexSorted(postIndex)
 	log.Println("generating archive index...")
 	genArchiveSorted(postArchive)
+	log.Println("generating rss.xml...")
+	genRssFile("rss.xml")
 }

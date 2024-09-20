@@ -75,7 +75,7 @@ func (p *Post) Execute() {
 
 // convert markdown => html for post
 // and generate footer as well
-func (p *Post) ConvPost() {
+func (p *Post) ConvPost(xhtml bool) {
 	fc, err := os.ReadFile(p.MarkdownFile)
 	if err != nil {
 		log.Fatal(err)
@@ -85,7 +85,7 @@ func (p *Post) ConvPost() {
 	md := "./" + path.Base(p.MarkdownFile)
 
 	// convert markdown to html
-	p.Content = template.HTML(mdToHTML(fc))
+	p.Content = template.HTML(mdToHTML(fc, xhtml))
 
 	// struct for footer template
 	footerData := struct {
