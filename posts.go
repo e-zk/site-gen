@@ -50,6 +50,7 @@ func (p *Post) IsArchived() bool {
 
 // execute post template
 func (p *Post) Execute() {
+	os.Create(p.OutPath())
 	err := os.Truncate(p.OutPath(), 0)
 	if err != nil {
 		log.Fatal(err)
@@ -59,6 +60,7 @@ func (p *Post) Execute() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer outputFile.Close()
 
 	t, err := template.ParseFiles("html/base.html", "html/post.html")
 	if err != nil {
