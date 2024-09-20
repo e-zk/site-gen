@@ -17,7 +17,13 @@ type Index struct {
 }
 
 func (data *Index) Execute(indexFile string) {
-	outputFile, err := os.Create(indexFile)
+	os.Create(indexFile)
+	err := os.Truncate(indexFile, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	outputFile, err := os.OpenFile(indexFile, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
