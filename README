@@ -5,14 +5,14 @@ WIP SSG FOR ZAKARIA.ORG
 	md.go    => markdown conversion
 	index.go => index generation
 	posts.go => post model
-	rss.go   => rss generation (TODO: could maybe just be part of index.go?)
+	rss.go   => rss generation
 
 TODO
 ----
 
 	- open-graph tags
-	- rss/atom feed generation (should be easy to work out)
 	- auto-generate onion-location <meta> tag for onion address
+	- cleanup + DRY (there is duplicated code accross rss.go+index.go)
 
 USAGE
 -----
