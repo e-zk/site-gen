@@ -39,11 +39,6 @@ func genAllPosts() {
 }
 
 func main() {
-	//ps := getAllPosts(".")
-	//for _, post := range ps {
-	//	log.Printf("%s / %s / %s / %s ==> %s", post.MarkdownFile, post.Date, post.Title, post.Description, post.Permalink)
-	//}
-
 	log.Println("starting...")
 	genAllPosts()
 	log.Println("generating index...")
