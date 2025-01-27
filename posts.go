@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"html"
 	"html/template"
 	"io/fs"
 	"log"
@@ -18,6 +19,7 @@ type Post struct {
 	Title       string
 	Description string
 	Date        string
+	Modified    string
 
 	// These we add ourselves
 	MarkdownFile string
@@ -85,7 +87,12 @@ func (p *Post) ConvPost(xhtml bool) {
 	md := "./" + path.Base(p.MarkdownFile)
 
 	// convert markdown to html
-	p.Content = template.HTML(mdToHTML(fc, xhtml))
+	content := mdToHTML(fc, xhtml)
+	contentStr := string(content[:])
+	if xhtml {
+		contentStr = html.EscapeString(contentStr)
+	}
+	p.Content = template.HTML(contentStr)
 
 	// struct for footer template
 	footerData := struct {
@@ -101,8 +108,11 @@ func (p *Post) ConvPost(xhtml bool) {
 	t, _ := template.New("footer").Parse(footerTemplate)
 	err = t.Execute(&out, footerData)
 
-	p.Footer = template.HTML(out.String())
-
+	outStr := out.String()
+	//if xhtml {
+	//	outStr = html.EscapeString(outStr)
+	//}
+	p.Footer = template.HTML(outStr)
 }
 
 // parse a .meta file into a new post
@@ -163,7 +173,9 @@ func getAllPosts(basedir string) []*Post {
 
 			// associated markdown file
 			mdPath := strings.TrimSuffix(fullpath, ".meta") + ".md"
-			if _, err := os.Stat(mdPath); errors.Is(err, os.ErrNotExist) {
+			// stat
+			stat, err := os.Stat(mdPath)
+			if errors.Is(err, os.ErrNotExist) {
 				log.Printf("%s: has no markdown associated with it - ignoring", fullpath)
 				return nil
 			}
@@ -188,6 +200,7 @@ func getAllPosts(basedir string) []*Post {
 			p.Onionlink = onion
 			p.Rellink = rel
 			p.Archived = archive
+			p.Modified = stat.ModTime().Format("2006-01-02")
 
 			ps = append(ps, p)
 		}
