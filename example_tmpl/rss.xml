@@ -1,0 +1,16 @@
+<rss version="2.0" xml:base="https://example.org">
+<channel>
+<title>blog</title>
+<description/>
+<link>https://example.org/posts/</link>
+{{ range .Posts }}
+<item>
+<link>{{ .Permalink }}</link>
+<title>{{ .Title }}</title>
+<pubDate>{{ .Date }}</pubDate>
+<description>
+{{ .Content }}
+</description>
+</item>
+{{end}}
+</channel>
