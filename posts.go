@@ -12,6 +12,9 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
+
+	"github.com/go-git/go-git/v5"
 )
 
 type Post struct {
@@ -22,12 +25,13 @@ type Post struct {
 	Modified    string
 
 	// These we add ourselves
-	MarkdownFile string
-	HtmlFile     string
-	Rellink      string
-	Permalink    string
-	Onionlink    string
-	Archived     bool
+	MarkdownFile     string
+	MarkdownFileHash string
+	HtmlFile         string
+	Rellink          string
+	Permalink        string
+	Onionlink        string
+	Archived         bool
 
 	// these get generated
 	Content template.HTML
@@ -87,7 +91,12 @@ func (p *Post) ConvPost(xhtml bool) {
 	md := "./" + path.Base(p.MarkdownFile)
 
 	// convert markdown to html
-	content := mdToHTML(fc, xhtml)
+	var content []byte
+	if xhtml {
+		content = mdToXHTML(fc)
+	} else {
+		content = mdToHTML(fc)
+	}
 	contentStr := string(content[:])
 	if xhtml {
 		contentStr = html.EscapeString(contentStr)
@@ -174,7 +183,7 @@ func getAllPosts(basedir string) []*Post {
 			// associated markdown file
 			mdPath := strings.TrimSuffix(fullpath, ".meta") + ".md"
 			// stat
-			stat, err := os.Stat(mdPath)
+			_, err := os.Stat(mdPath)
 			if errors.Is(err, os.ErrNotExist) {
 				log.Printf("%s: has no markdown associated with it - ignoring", fullpath)
 				return nil
@@ -194,13 +203,50 @@ func getAllPosts(basedir string) []*Post {
 			// parse meta file into new post
 			p := newPostFromMeta(fullpath)
 
+			if p.Date != "" {
+				r, err := git.PlainOpen("./.git")
+				if err != nil {
+					log.Println("err opening .git:")
+					log.Fatal(err)
+				}
+				ref, err := r.Head()
+				if err != nil {
+					log.Println("err getting head:")
+					log.Fatal(err)
+				}
+
+				cIter, err := r.Log(&git.LogOptions{
+					From:     ref.Hash(),
+					FileName: &mdPath,
+				})
+				if err != nil {
+					log.Println("iter err:")
+					log.Fatal(err)
+				}
+
+				//err = cIter.ForEach(func(c *object.Commit) error {
+				//	fmt.Println(c)
+				//	return nil
+				//})
+				c, err := cIter.Next()
+				//if errors.Is(err, errors.New("EOF")) {
+				//
+				//} else if err != nil {
+				if err != nil {
+					log.Fatalf("iter.next err for %q: %v", mdPath, err)
+				}
+
+				ctime := c.Author.When.Format(time.DateOnly)
+				log.Printf("got lmod for %q: %s (%s)", mdPath, ctime, c.Hash.String())
+				p.Modified = ctime
+				p.MarkdownFileHash = c.Hash.String()
+			}
 			p.MarkdownFile = mdPath
 			p.HtmlFile = htmlPath
 			p.Permalink = perma
 			p.Onionlink = onion
 			p.Rellink = rel
 			p.Archived = archive
-			p.Modified = stat.ModTime().Format("2006-01-02")
 
 			ps = append(ps, p)
 		}
