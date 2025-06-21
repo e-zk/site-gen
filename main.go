@@ -1,50 +1,115 @@
 package main
 
 import (
+	"io/fs"
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"site-gen/index"
+	"site-gen/post"
 )
 
 const (
-	hostname       = "zakaria.org"
-	baseUrl        = "https://" + hostname
-	onionUrl       = "http://64wv2uqwjacqer7z5d6ooqgrvjwlioizmo7hgmxm7zxerbvgnoqhafid.onion"
-	postsDir       = "./posts"
-	postIndex      = postsDir + "/index.html"
-	postArchive    = postsDir + "/archive.html"
-	footerTemplate = `<p><a href="https://creativecommons.org/licenses/by-sa/4.0/">&copy; CC BY-SA 4.0</a> <a href="{{.Plaintext}}">plaintext</a> <a href="{{.Onion}}">onion</a></p>`
+	FQDN    = "zakaria.org"
+	BaseURL = "https://" + FQDN + "/"
 )
 
-var (
-	// posts to archive
-	archivePerma = []string{
-		"https://zakaria.org/posts/2020-08-01-shblog.html",
-		"https://zakaria.org/posts/2020-08-03-m4.html",
-		"https://zakaria.org/posts/2020-09-09-tmux.html",
-		"https://zakaria.org/posts/2020-11-07-malthusian-belt.html",
-		"https://zakaria.org/posts/2020-12-05-fonts.html",
-	}
-)
+func getAllPosts(basedir string) []*post.Post {
+	ps := make([]*post.Post, 0)
 
-func genAllPosts() {
-	ps := getAllPosts("./")
-	for _, p := range ps {
-		log.Printf("%s => %s", p.MarkdownFile, p.OutPath())
+	// walk our directory tree and add all posts (.meta) we can find
+	rfs := os.DirFS(basedir)
+	fs.WalkDir(rfs, ".", func(fpath string, d fs.DirEntry, err error) error {
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		// prepare for template execution by conveting mardown => html
-		p.ConvPost(false)
+		if filepath.Ext(fpath) == ".meta" {
+			fullPath := filepath.Join(basedir, fpath)
+			if strings.HasPrefix(filepath.Base(fpath), ".") {
+				// skip hidden files
+				log.Printf(">> skipping %q (hidden)", fullPath)
+				return nil
+			}
+			log.Printf(">> found %q", fullPath)
+			p, err := post.New(fullPath)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		// execute template to generate full .html
-		p.Execute()
-	}
+			p.BlogFQDN = FQDN
+			p.BlogBaseURL = BaseURL
+
+			ps = append(ps, p)
+		}
+		return nil
+	})
+	return ps
 }
 
 func main() {
-	log.Println("starting...")
-	genAllPosts()
-	log.Println("generating index...")
-	genIndexSorted(postIndex)
-	log.Println("generating archive index...")
-	genArchiveSorted(postArchive)
-	log.Println("generating rss.xml...")
-	genRssFile("rss.xml")
+	log.Printf("> compiling...")
+	posts := getAllPosts(".")
+
+	// compile all posts
+	for _, p := range posts {
+		log.Printf(">> loading post %q", p.Metadata.Title)
+
+		err := p.Parse(false)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = p.Execute("./html/base.html", "./html/post.html")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// generate index (only from ./posts)
+	// todo make this callable via arguments:
+	// site-gen index \
+	// 	-path "./posts" -title "Web log" \
+	// 	-template "./html/posts.html" -output "./pots/index.html"
+
+	log.Printf("> indexing...")
+	blogPosts := getAllPosts("./posts")
+	blogIndex := index.New(blogPosts)
+	blogIndex.Title = "Web log"
+	blogIndex.Templates = []string{"html/base.html", "html/posts.html"}
+	err := blogIndex.Execute("./posts/index.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("> generating rss...")
+	rssIndex := index.New(blogPosts)
+
+	// compile+change date format afterwards (idk if this works)
+	for _, p := range rssIndex.List {
+		log.Printf(">> compiling post as xhtml %q", p.Metadata.Title)
+		d, err := time.Parse("2006-01-02", p.Metadata.Date)
+		if err != nil {
+			log.Fatal(err)
+		}
+		p.Metadata.Date = d.Format(time.RFC1123Z)
+		err = p.Parse(true)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	rssIndex.Title = "Web log" // don't even need this
+	rssIndex.Templates = []string{"html/rss.xml"}
+	err = rssIndex.Execute("./rss.xml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// would be cool not worth implementing since i only have one index page:
+	// site-gen index <-dir path> [-output file] [-title "index"]
+	// where <dir> dir containing posts to index
+	//       [output] is the generated index file (defaults to <dir>/index.html)
 }
