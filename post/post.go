@@ -39,7 +39,6 @@ func New(metafile string) (p *Post, err error) {
 
 	p.HTMLPath = strings.TrimSuffix(p.Metadata.Path, ".md") + ".html"
 	p.RelativeURL = strings.TrimLeft(p.HTMLPath, "./") // cuz sometimes its prefixed w/ .
-	//	p.PermanentURL = baseURL + p.HTMLPath
 
 	// if we have a publish date, we probably want a last modified date.
 	// we use the last git commit on the markdown file for that.
