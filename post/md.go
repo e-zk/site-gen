@@ -3,7 +3,6 @@ package post
 import (
 	"bytes"
 	"io"
-	"log"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/ast"
@@ -21,7 +20,6 @@ var MyXMLOptions html.RendererOptions
 
 type Box struct {
 	ast.Leaf
-	//Content string
 	Content []byte
 }
 
@@ -80,7 +78,6 @@ func boxRenderHook(w io.Writer, node ast.Node, entering bool) (ast.WalkStatus, b
 			boxHTML := markdown.Render(boxDoc, &renderer)
 			io.WriteString(w, string(boxHTML))
 			io.WriteString(w, "</section>\n\n")
-			log.Printf("done")
 		}
 		return ast.GoToNext, true
 	}
