@@ -35,7 +35,7 @@ func init() {
 	MyRenderer = html.NewRenderer(MyOptions)
 
 	MyXMLOptions = html.RendererOptions{
-		Flags:          htmlFlags,
+		Flags:          html.UseXHTML,
 		RenderNodeHook: boxRenderHookXML,
 	}
 	MyXMLRenderer = html.NewRenderer(MyXMLOptions)

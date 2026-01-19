@@ -46,6 +46,7 @@ func New(metafile string) (p *Post, err error) {
 	if p.Metadata.Date != "" {
 		// ignore error just leave them blank
 		hash, modified, err := getLastCommit(p.Metadata.Path)
+		//debugging: log.Printf("got hash: %v", hash)
 		if err != nil {
 			log.Printf("%w (ignored)", err)
 		} else {

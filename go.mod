@@ -5,6 +5,7 @@ go 1.23.0
 toolchain go1.24.1
 
 require (
+	github.com/BurntSushi/toml v1.5.0
 	github.com/go-git/go-git/v5 v5.16.0
 	github.com/gomarkdown/markdown v0.0.0-20231115200524-a660076da3fd
 )

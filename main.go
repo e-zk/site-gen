@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"site-gen/bookshelf"
 	"site-gen/index"
 	"site-gen/post"
 )
@@ -50,7 +51,7 @@ func getAllPosts(basedir string) []*post.Post {
 	return ps
 }
 
-func main() {
+func compile() {
 	log.Printf("> compiling...")
 	posts := getAllPosts(".")
 
@@ -74,7 +75,9 @@ func main() {
 	// site-gen index \
 	// 	-path "./posts" -title "Web log" \
 	// 	-template "./html/posts.html" -output "./pots/index.html"
+}
 
+func indexAll() {
 	log.Printf("> indexing...")
 	blogPosts := getAllPosts("./posts")
 	blogIndex := index.New(blogPosts)
@@ -107,7 +110,37 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
 
+func books() {
+	err := bookshelf.New(
+		"./bookshelf/bookshelf.toml",
+		"./bookshelf/index.html",
+		[]string{"html/base.html", "html/bookshelf.html"},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func main() {
+	if len(os.Args) == 0 {
+		compile()
+		indexAll()
+		books()
+	}
+	switch os.Args[1] {
+	case "compile":
+		compile()
+	case "index":
+		indexAll()
+	case "bookshelf":
+		books()
+	default:
+		compile()
+		indexAll()
+		books()
+	}
 	// would be cool not worth implementing since i only have one index page:
 	// site-gen index <-dir path> [-output file] [-title "index"]
 	// where <dir> dir containing posts to index
