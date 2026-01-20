@@ -3,6 +3,7 @@ package post
 import (
 	"bufio"
 	"errors"
+	"log"
 	"os"
 	"strings"
 )
@@ -16,13 +17,23 @@ var (
 
 type PostMetadata struct {
 	Title       string // title (mandatory)
-	Path        string // markdown path
+	Path        string // plaintext path
 	Description string
 	Date        string
 	ImageURL    string
 	Archived    bool
 	Tags        []string // unused
 	Type        string   // unused
+}
+
+func fileExists(path string) bool {
+	if _, err := os.Stat(path); err == nil {
+		return true
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	log.Printf("file %q may or may not exist; this path should not be reached", path)
+	return false
 }
 
 func isStringBool(s string) bool {
@@ -79,8 +90,17 @@ func (p *Post) loadMetadata(path string) error {
 
 	// if no path given assume its the same as .meta, but w/ .md ext
 	if len(m.Path) == 0 {
-		m.Path = strings.TrimSuffix(path, ".meta") + ".md"
+		p := strings.TrimSuffix(path, ".meta")
+		if fileExists(p + ".djot") {
+			m.Path = p + ".djot"
+		} else if fileExists(p + ".md") {
+			m.Path = p + ".md"
+		}
 	}
+	if !fileExists(m.Path) {
+		return ErrNoPath
+	}
+
 	//
 	if len(m.Title) == 0 {
 		return ErrNoTitle

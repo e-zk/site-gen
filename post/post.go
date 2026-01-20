@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+// converter function type def (see md.go + djot.go for implementations)
+type ConvFunc func(data []byte) []byte
+
 type Post struct {
 	Metadata PostMetadata
 
@@ -34,7 +37,7 @@ func New(metafile string) (p *Post, err error) {
 	}
 
 	if _, err := os.Stat(p.Metadata.Path); errors.Is(err, os.ErrNotExist) {
-		return nil, fmt.Errorf("%q: markdown path does not exist!", metafile)
+		return nil, fmt.Errorf("%q: plaintext path does not exist!", metafile)
 	}
 
 	p.HTMLPath = strings.TrimSuffix(p.Metadata.Path, ".md") + ".html"
@@ -65,12 +68,24 @@ func (p *Post) Parse(xhtml bool) error {
 	}
 
 	var htmlContent string
-	if xhtml {
-		htmlContent = string(mdToXHTML(fc)[:])
-		htmlContent = template.HTMLEscapeString(htmlContent)
+	//var converter ConvFunc
+
+	if strings.HasSuffix(p.Metadata.Path, ".djot") {
+		if xhtml {
+			htmlContent = string(djotToXHTML(fc[:]))
+			htmlContent = template.HTMLEscapeString(htmlContent)
+		} else {
+			htmlContent = string(djotToHTML(fc[:]))
+		}
 	} else {
-		htmlContent = string(mdToHTML(fc)[:])
+		if xhtml {
+			htmlContent = string(mdToXHTML(fc[:]))
+			htmlContent = template.HTMLEscapeString(htmlContent)
+		} else {
+			htmlContent = string(mdToHTML(fc[:]))
+		}
 	}
+
 	p.Content = template.HTML(htmlContent)
 
 	return nil

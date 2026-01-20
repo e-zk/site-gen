@@ -102,19 +102,19 @@ func boxRenderHookXML(w io.Writer, node ast.Node, entering bool) (ast.WalkStatus
 	return ast.GoToNext, false
 }
 
-func mdToHTML(md []byte) []byte {
+func mdToHTML(data []byte) []byte {
 	p := parser.NewWithExtensions(MyExtensions)
 	p.Opts.ParserHook = parserHook
-	doc := p.Parse(md)
+	doc := p.Parse(data)
 
 	renderer := *MyRenderer
 	return markdown.Render(doc, &renderer)
 }
 
-func mdToXHTML(md []byte) []byte {
+func mdToXHTML(data []byte) []byte {
 	p := parser.NewWithExtensions(MyExtensions)
 	p.Opts.ParserHook = parserHook
-	doc := p.Parse(md)
+	doc := p.Parse(data)
 
 	renderer := *MyXMLRenderer
 	return markdown.Render(doc, &renderer)
