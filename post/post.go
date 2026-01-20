@@ -40,7 +40,7 @@ func New(metafile string) (p *Post, err error) {
 		return nil, fmt.Errorf("%q: plaintext path does not exist!", metafile)
 	}
 
-	p.HTMLPath = strings.TrimSuffix(p.Metadata.Path, ".md") + ".html"
+	p.HTMLPath = trimAllSuffix(p.Metadata.Path, []string{".md", ".dj", ".djot"}) + ".html"
 	p.RelativeURL = strings.TrimLeft(p.HTMLPath, "./") // cuz sometimes its prefixed w/ .
 
 	// if we have a publish date, we probably want a last modified date.

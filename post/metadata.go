@@ -26,27 +26,6 @@ type PostMetadata struct {
 	Type        string   // unused
 }
 
-func fileExists(path string) bool {
-	if _, err := os.Stat(path); err == nil {
-		return true
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false
-	}
-	log.Printf("file %q may or may not exist; this path should not be reached", path)
-	return false
-}
-
-func isStringBool(s string) bool {
-	s = strings.ToLower(s)
-	if s == "" {
-		return false
-	}
-	if s == "true" {
-		return true
-	}
-	return false
-}
-
 // parse a .meta file into a new post
 func (p *Post) loadMetadata(path string) error {
 	// give us the key:value pair
